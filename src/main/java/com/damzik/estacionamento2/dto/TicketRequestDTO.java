@@ -1,6 +1,7 @@
 package com.damzik.estacionamento2.dto;
 
 import com.damzik.estacionamento2.entities.Veiculo;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class TicketRequestDTO {
 
+    @NotNull(message = "O ID do veículo é obrigatório.")
     private Long veiculoId;
 
     public TicketRequestDTO() {

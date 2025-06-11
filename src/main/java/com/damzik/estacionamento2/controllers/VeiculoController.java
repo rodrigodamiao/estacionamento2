@@ -4,6 +4,7 @@ import com.damzik.estacionamento2.dto.VeiculoRequestDTO;
 import com.damzik.estacionamento2.dto.VeiculoResponseDTO;
 import com.damzik.estacionamento2.entities.Veiculo;
 import com.damzik.estacionamento2.services.VeiculoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +48,7 @@ public class VeiculoController {
     }
 
     @PostMapping
-    public ResponseEntity<VeiculoResponseDTO> addVeiculo(@RequestBody VeiculoRequestDTO veiculoRequestDTO){
+    public ResponseEntity<VeiculoResponseDTO> addVeiculo(@RequestBody @Valid VeiculoRequestDTO veiculoRequestDTO){
         Veiculo veiculo = veiculoService.addVeiculo(veiculoRequestDTO);
 
         VeiculoResponseDTO veiculoResponseDTO = new VeiculoResponseDTO(veiculo);

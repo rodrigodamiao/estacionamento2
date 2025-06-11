@@ -4,6 +4,7 @@ import com.damzik.estacionamento2.dto.TicketRequestDTO;
 import com.damzik.estacionamento2.dto.TicketResponseDTO;
 import com.damzik.estacionamento2.entities.Ticket;
 import com.damzik.estacionamento2.services.TicketService;
+import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,8 +49,17 @@ public class TicketController {
         return ResponseEntity.ok(ticketResponseDTO);
     }
 
+    @GetMapping("/veiculo/{veiculoId}")
+    public ResponseEntity<List<TicketResponseDTO>> buscarTicketsDoVeiculo(@PathVariable Long veiculoId) {
+        List<Ticket> tickets = ticketService.buscarTicketsDoVeiculo(veiculoId);
+        List<TicketResponseDTO> response = tickets.stream()
+                .map(TicketResponseDTO::new)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
-    public ResponseEntity<TicketResponseDTO> addTicket(@RequestBody TicketRequestDTO ticketRequestDTO){
+    public ResponseEntity<TicketResponseDTO> addTicket(@RequestBody @Valid TicketRequestDTO ticketRequestDTO){
         Ticket ticket = ticketService.addTicket(ticketRequestDTO);
 
         TicketResponseDTO ticketResponseDTO = new TicketResponseDTO(ticket);
@@ -58,7 +68,7 @@ public class TicketController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TicketResponseDTO> finalizarTicket(@PathVariable Long id){
+    public ResponseEntity<TicketResponseDTO> finalizarTicket(@PathVariable @Valid Long id){
         Ticket ticket = ticketService.finalizarTicket(id);
 
         TicketResponseDTO ticketResponseDTO = new TicketResponseDTO(ticket);

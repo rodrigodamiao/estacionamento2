@@ -3,7 +3,9 @@ package com.damzik.estacionamento2.services;
 import com.damzik.estacionamento2.dto.TicketRequestDTO;
 import com.damzik.estacionamento2.entities.Ticket;
 import com.damzik.estacionamento2.entities.Veiculo;
+import com.damzik.estacionamento2.exceptions.TicketJaFinalizadoException;
 import com.damzik.estacionamento2.exceptions.TicketNotFoundException;
+import com.damzik.estacionamento2.exceptions.VeiculoJaPossuiTicketAbertoException;
 import com.damzik.estacionamento2.exceptions.VeiculoNotFoundException;
 import com.damzik.estacionamento2.repositories.TicketRepository;
 import com.damzik.estacionamento2.repositories.VeiculoRepository;
@@ -35,14 +37,24 @@ public class TicketService {
         return ticket;
     }
 
+    public List<Ticket> buscarTicketsDoVeiculo(Long veiculoId) {
+        return ticketRepository.findByVeiculoId(veiculoId);
+    }
+
     public Ticket addTicket(TicketRequestDTO ticketRequestDTO){
+
+        Long veiculoId = ticketRequestDTO.getVeiculoId();
+
+        List<Ticket> ticketsAbertos = ticketRepository.findByVeiculoIdAndStatus(veiculoId, "ABERTO");
+        if (!ticketsAbertos.isEmpty()) {
+            throw new VeiculoJaPossuiTicketAbertoException(veiculoId);
+        }
+
         Ticket ticket = new Ticket();
 
         ticket.setValor(5.00);
         ticket.setEntrada(LocalDateTime.now());
-        //ticket.setSaida(); null
 
-        Long veiculoId = ticketRequestDTO.getVeiculoId();
         Veiculo veiculo = veiculoRepository.findById(veiculoId)
                 .orElseThrow(() -> new VeiculoNotFoundException(veiculoId));
 
@@ -59,6 +71,10 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new TicketNotFoundException(id));
 
+        if (ticket.getStatus().equals("FECHADO")) {
+            throw new TicketJaFinalizadoException(ticket.getId());
+        }
+
         ticket.setStatus("FECHADO");
 
         ticket.setSaida(LocalDateTime.now());
@@ -68,6 +84,8 @@ public class TicketService {
         }else{
             ticket.setValor(10.0);
         }
+
+        ticketRepository.save(ticket);
 
         return ticket;
     }
